@@ -14,14 +14,16 @@ public class Player : MonoBehaviour {
     private Rigidbody2D rb;
     private Animator anim;
     private CapsuleCollider2D playerCollider;
+    private BoxCollider2D playerFeet;
 
-    
+
 
     void Start () {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         playerCollider = GetComponent<CapsuleCollider2D>();
         initialGravityScale = rb.gravityScale;
+        playerFeet = GetComponent<BoxCollider2D>();
     }
 	
 	
@@ -38,6 +40,10 @@ public class Player : MonoBehaviour {
 
     void Run()
     {
+        if (Mathf.Abs(rb.velocity.y) > Mathf.Epsilon )//if y movement > 0
+        {
+            return;
+        }
         float xAxis = CrossPlatformInputManager.GetAxis("Horizontal");
         Vector2 movement = new Vector2(xAxis * runSpeed, rb.velocity.y);
         rb.velocity = movement;
@@ -47,12 +53,12 @@ public class Player : MonoBehaviour {
     }
 
     void Jump()
-    {      
-        if (Mathf.Abs(rb.velocity.y) > Mathf.Epsilon)//if y movement > 0
+    {       
+        if ( !playerFeet.IsTouchingLayers(LayerMask.GetMask("Ground"))) 
         {
             return;
         }
-        Vector2 jumpVelocity = new Vector2(rb.velocity.x, jumpStrength);
+        Vector2 jumpVelocity = new Vector2(0, jumpStrength);
         rb.velocity = jumpVelocity;
     }
 
