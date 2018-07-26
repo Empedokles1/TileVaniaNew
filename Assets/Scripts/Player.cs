@@ -4,8 +4,7 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 public class Player : MonoBehaviour {
-
-    
+   
     [SerializeField] float runSpeed = 5f;
     [SerializeField] float jumpStrength = 20f;
     [SerializeField] float climbSpeed = 5f;
@@ -16,7 +15,13 @@ public class Player : MonoBehaviour {
     private CapsuleCollider2D playerCollider;
     private BoxCollider2D playerFeet;
 
+    private bool canMove = true;
 
+    public bool CanMove
+    {
+        get { return canMove; }
+        set { canMove = value; }
+    }
 
     void Start () {
         rb = GetComponent<Rigidbody2D>();
@@ -25,25 +30,20 @@ public class Player : MonoBehaviour {
         initialGravityScale = rb.gravityScale;
         playerFeet = GetComponent<BoxCollider2D>();
     }
-	
-	
+		
 	void Update () {
-        Run();
-        if (CrossPlatformInputManager.GetButtonDown("Jump"))
+        if (canMove)
         {
+            Run();
             Jump();
-        }
-        ClimbLadder();
-
-        
+            ClimbLadder();
+            Die();
+        }       
 	}
 
     void Run()
     {
-        if (Mathf.Abs(rb.velocity.y) > Mathf.Epsilon )//if y movement > 0
-        {
-            return;
-        }
+        
         float xAxis = CrossPlatformInputManager.GetAxis("Horizontal");
         Vector2 movement = new Vector2(xAxis * runSpeed, rb.velocity.y);
         rb.velocity = movement;
@@ -53,13 +53,17 @@ public class Player : MonoBehaviour {
     }
 
     void Jump()
-    {       
-        if ( !playerFeet.IsTouchingLayers(LayerMask.GetMask("Ground"))) 
+    {
+        if (CrossPlatformInputManager.GetButtonDown("Jump"))
         {
-            return;
+            if (!playerFeet.IsTouchingLayers(LayerMask.GetMask("Ground")))
+            {
+                return;
+            }
+            Vector2 jumpVelocity = new Vector2(0, jumpStrength);
+            rb.velocity = jumpVelocity;
         }
-        Vector2 jumpVelocity = new Vector2(0, jumpStrength);
-        rb.velocity = jumpVelocity;
+        
     }
 
     void ClimbLadder()
@@ -85,6 +89,17 @@ public class Player : MonoBehaviour {
         if (movement.x > 0)
         {
             transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+    }
+
+    private void Die()
+    {
+        if (playerCollider.IsTouchingLayers(LayerMask.GetMask("Enemy", "Hazards")) || playerFeet.IsTouchingLayers(LayerMask.GetMask("Enemy","Hazards")))
+        {
+            canMove = false;           
+            anim.SetTrigger("die");
+            rb.AddForce(new Vector2(0f, 10f), ForceMode2D.Impulse);
+            
         }
     }
 }
