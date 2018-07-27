@@ -10,7 +10,9 @@ public class LevelExit : MonoBehaviour {
         if(collision.tag == "Player")
         {
             Invoke("LoadNextLevel",1f);
-            GameObject.FindObjectOfType<Player>().CanMove = false;
+            var player = GameObject.FindObjectOfType<Player>();
+            player.CanMove = false;
+            player.anim.SetTrigger("freeze");          
         }
     }
 

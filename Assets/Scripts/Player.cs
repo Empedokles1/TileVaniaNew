@@ -10,8 +10,8 @@ public class Player : MonoBehaviour {
     [SerializeField] float climbSpeed = 5f;
     float initialGravityScale;
 
-    private Rigidbody2D rb;
-    private Animator anim;
+    public Rigidbody2D rb;
+    public Animator anim;
     private CapsuleCollider2D playerCollider;
     private BoxCollider2D playerFeet;
 
@@ -99,7 +99,7 @@ public class Player : MonoBehaviour {
             canMove = false;           
             anim.SetTrigger("die");
             rb.AddForce(new Vector2(0f, 10f), ForceMode2D.Impulse);
-            
+            GameObject.FindObjectOfType<GameSession>().ProcessPlayerDeath();
         }
     }
 }
